@@ -314,7 +314,7 @@ def rotation_matrix_to_quaternion(rotation_matrix, eps=1e-6):
     return q
 
 
-def quaternion_to_angle_axis(quaternion: torch.Tensor) -> torch.Tensor:
+def quaternion_to_angle_axis(quaternion) -> torch.Tensor:
     """Convert quaternion vector to angle axis of rotation.
 
     Adapted from ceres C++ library: ceres-solver/include/ceres/rotation.h
@@ -341,23 +341,23 @@ def quaternion_to_angle_axis(quaternion: torch.Tensor) -> torch.Tensor:
         raise ValueError("Input must be a tensor of shape Nx4 or 4. Got {}"
                          .format(quaternion.shape))
     # unpack input and compute conversion
-    q1: torch.Tensor = quaternion[..., 1]
-    q2: torch.Tensor = quaternion[..., 2]
-    q3: torch.Tensor = quaternion[..., 3]
-    sin_squared_theta: torch.Tensor = q1 * q1 + q2 * q2 + q3 * q3
+    q1 = quaternion[..., 1]
+    q2 = quaternion[..., 2]
+    q3 = quaternion[..., 3]
+    sin_squared_theta = q1 * q1 + q2 * q2 + q3 * q3
 
-    sin_theta: torch.Tensor = torch.sqrt(sin_squared_theta)
-    cos_theta: torch.Tensor = quaternion[..., 0]
-    two_theta: torch.Tensor = 2.0 * torch.where(
+    sin_theta = torch.sqrt(sin_squared_theta)
+    cos_theta = quaternion[..., 0]
+    two_theta = 2.0 * torch.where(
         cos_theta < 0.0,
         torch.atan2(-sin_theta, -cos_theta),
         torch.atan2(sin_theta, cos_theta))
 
-    k_pos: torch.Tensor = two_theta / sin_theta
-    k_neg: torch.Tensor = 2.0 * torch.ones_like(sin_theta)
-    k: torch.Tensor = torch.where(sin_squared_theta > 0.0, k_pos, k_neg)
+    k_pos = two_theta / sin_theta
+    k_neg = 2.0 * torch.ones_like(sin_theta)
+    k = torch.where(sin_squared_theta > 0.0, k_pos, k_neg)
 
-    angle_axis: torch.Tensor = torch.zeros_like(quaternion)[..., :3]
+    angle_axis = torch.zeros_like(quaternion)[..., :3]
     angle_axis[..., 0] += q1 * k
     angle_axis[..., 1] += q2 * k
     angle_axis[..., 2] += q3 * k
@@ -367,7 +367,7 @@ def quaternion_to_angle_axis(quaternion: torch.Tensor) -> torch.Tensor:
 # https://github.com/facebookresearch/QuaterNet/blob/master/common/quaternion.py#L138
 
 
-def angle_axis_to_quaternion(angle_axis: torch.Tensor) -> torch.Tensor:
+def angle_axis_to_quaternion(angle_axis) -> torch.Tensor:
     """Convert an angle axis to a quaternion.
 
     Adapted from ceres C++ library: ceres-solver/include/ceres/rotation.h
@@ -394,23 +394,23 @@ def angle_axis_to_quaternion(angle_axis: torch.Tensor) -> torch.Tensor:
         raise ValueError("Input must be a tensor of shape Nx3 or 3. Got {}"
                          .format(angle_axis.shape))
     # unpack input and compute conversion
-    a0: torch.Tensor = angle_axis[..., 0:1]
-    a1: torch.Tensor = angle_axis[..., 1:2]
-    a2: torch.Tensor = angle_axis[..., 2:3]
-    theta_squared: torch.Tensor = a0 * a0 + a1 * a1 + a2 * a2
+    a0 = angle_axis[..., 0:1]
+    a1 = angle_axis[..., 1:2]
+    a2 = angle_axis[..., 2:3]
+    theta_squared = a0 * a0 + a1 * a1 + a2 * a2
 
-    theta: torch.Tensor = torch.sqrt(theta_squared)
-    half_theta: torch.Tensor = theta * 0.5
+    theta = torch.sqrt(theta_squared)
+    half_theta = theta * 0.5
 
-    mask: torch.Tensor = theta_squared > 0.0
-    ones: torch.Tensor = torch.ones_like(half_theta)
+    mask = theta_squared > 0.0
+    ones = torch.ones_like(half_theta)
 
-    k_neg: torch.Tensor = 0.5 * ones
-    k_pos: torch.Tensor = torch.sin(half_theta) / theta
-    k: torch.Tensor = torch.where(mask, k_pos, k_neg)
-    w: torch.Tensor = torch.where(mask, torch.cos(half_theta), ones)
+    k_neg = 0.5 * ones
+    k_pos = torch.sin(half_theta) / theta
+    k = torch.where(mask, k_pos, k_neg)
+    w = torch.where(mask, torch.cos(half_theta), ones)
 
-    quaternion: torch.Tensor = torch.zeros_like(angle_axis)
+    quaternion = torch.zeros_like(angle_axis)
     quaternion[..., 0:1] += a0 * k
     quaternion[..., 1:2] += a1 * k
     quaternion[..., 2:3] += a2 * k

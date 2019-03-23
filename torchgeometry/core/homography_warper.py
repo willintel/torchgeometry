@@ -26,7 +26,7 @@ class HomographyWarper(nn.Module):
     Args:
         height (int): The height of the image to warp.
         width (int): The width of the image to warp.
-        mode (Optional[str]): interpolation mode to calculate output values
+        mode (Optional[str])erpolation mode to calculate output values
           'bilinear' | 'nearest'. Default: 'bilinear'.
         padding_mode (Optional[str]): padding mode for outside grid values
           'zeros' | 'border' | 'reflection'. Default: 'zeros'.
@@ -36,20 +36,20 @@ class HomographyWarper(nn.Module):
 
     def __init__(
             self,
-            height: int,
-            width: int,
-            mode: Optional[str] = 'bilinear',
-            padding_mode: Optional[str] = 'zeros',
-            normalized_coordinates: Optional[bool] = True) -> None:
+            height,
+            width,
+            mode = 'bilinear',
+            padding_mode = 'zeros',
+            normalized_coordinates = True):
         super(HomographyWarper, self).__init__()
-        self.width: int = width
-        self.height: int = height
-        self.mode: Optional[str] = mode
-        self.padding_mode: Optional[str] = padding_mode
-        self.normalized_coordinates: Optional[bool] = normalized_coordinates
+        self.width = width
+        self.height = height
+        self.mode = mode
+        self.padding_mode = padding_mode
+        self.normalized_coordinates = normalized_coordinates
 
         # create base grid to compute the flow
-        self.grid: torch.Tensor = create_meshgrid(
+        self.grid = create_meshgrid(
             height, width, normalized_coordinates=normalized_coordinates)
 
     def warp_grid(self, dst_homo_src: torch.Tensor) -> torch.Tensor:
@@ -63,16 +63,16 @@ class HomographyWarper(nn.Module):
         Returns:
             torch.Tensor: the transformed grid of shape :math:`(N, H, W, 2)`.
         """
-        batch_size: int = dst_homo_src.shape[0]
-        device: torch.device = dst_homo_src.device
-        dtype: torch.dtype = dst_homo_src.dtype
+        batch_size = dst_homo_src.shape[0]
+        device = dst_homo_src.device
+        dtype = dst_homo_src.dtype
         # expand grid to match the input batch size
-        grid: torch.Tensor = self.grid.expand(batch_size, -1, -1, -1)  # NxHxWx2
+        grid = self.grid.expand(batch_size, -1, -1, -1)  # NxHxWx2
         if len(dst_homo_src.shape) == 3:  # local homography case
             dst_homo_src = dst_homo_src.view(batch_size, 1, 3, 3)  # NxHxWx3x3
         # perform the actual grid transformation,
         # the grid is copied to input device and casted to the same type
-        flow: torch.Tensor = transform_points(
+        flow = transform_points(
             dst_homo_src, grid.to(device).to(dtype))  # NxHxWx2
         return flow.view(batch_size, self.height, self.width, 2)  # NxHxWx2
 
@@ -116,8 +116,8 @@ class HomographyWarper(nn.Module):
 def homography_warp(patch_src: torch.Tensor,
                     dst_homo_src: torch.Tensor,
                     dsize: Tuple[int, int],
-                    mode: Optional[str] = 'bilinear',
-                    padding_mode: Optional[str] = 'zeros') -> torch.Tensor:
+                    mode = 'bilinear',
+                    padding_mode = 'zeros') -> torch.Tensor:
     r"""Function that warps image patchs or tensors by homographies.
 
     See :class:`~torchgeometry.HomographyWarper` for details.
@@ -129,7 +129,7 @@ def homography_warp(patch_src: torch.Tensor,
                                      from source to destination of shape
                                      :math:`(N, 3, 3)`.
         dsize (Tuple[int, int]): The height and width of the image to warp.
-        mode (Optional[str]): interpolation mode to calculate output values
+        mode (Optional[str])erpolation mode to calculate output values
           'bilinear' | 'nearest'. Default: 'bilinear'.
         padding_mode (Optional[str]): padding mode for outside grid values
           'zeros' | 'border' | 'reflection'. Default: 'zeros'.

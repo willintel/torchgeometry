@@ -47,7 +47,7 @@ class DiceLoss(nn.Module):
 
     def __init__(self) -> None:
         super(DiceLoss, self).__init__()
-        self.eps: float = 1e-6
+        self.eps = 1e-6
 
     def forward(
             self,

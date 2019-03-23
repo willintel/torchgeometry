@@ -6,8 +6,8 @@ import torch.nn.functional as F
 
 
 def create_meshgrid(
-        x: torch.Tensor,
-        normalized_coordinates: Optional[bool]) -> torch.Tensor:
+        x,
+        normalized_coordinates) -> torch.Tensor:
     assert len(x.shape) == 4, x.shape
     _, _, height, width = x.shape
     _device, _dtype = x.device, x.dtype
@@ -44,12 +44,12 @@ class SpatialSoftArgmax2d(nn.Module):
         >>> x_coord, y_coord = torch.chunk(coords, dim=-1, chunks=2)
     """
 
-    def __init__(self, normalized_coordinates: Optional[bool] = True) -> None:
+    def __init__(self, normalized_coordinates = True) -> None:
         super(SpatialSoftArgmax2d, self).__init__()
-        self.normalized_coordinates: Optional[bool] = normalized_coordinates
-        self.eps: float = 1e-6
+        self.normalized_coordinates = normalized_coordinates
+        self.eps = 1e-6
 
-    def forward(self, input: torch.Tensor) -> torch.Tensor:
+    def forward(self, input) -> torch.Tensor:
         if not torch.is_tensor(input):
             raise TypeError("Input input type is not a torch.Tensor. Got {}"
                             .format(type(input)))
@@ -58,7 +58,7 @@ class SpatialSoftArgmax2d(nn.Module):
                              .format(input.shape))
         # unpack shapes and create view from input tensor
         batch_size, channels, height, width = input.shape
-        x: torch.Tensor = input.view(batch_size, channels, -1)
+        x = input.view(batch_size, channels, -1)
 
         # compute softmax with max substraction trick
         exp_x = torch.exp(x - torch.max(x, dim=-1, keepdim=True)[0])
@@ -70,11 +70,11 @@ class SpatialSoftArgmax2d(nn.Module):
         pos_y = pos_y.reshape(-1)
 
         # compute the expected coordinates
-        expected_y: torch.Tensor = torch.sum(
+        expected_y = torch.sum(
             (pos_y * exp_x) * exp_x_sum, dim=-1, keepdim=True)
-        expected_x: torch.Tensor = torch.sum(
+        expected_x = torch.sum(
             (pos_x * exp_x) * exp_x_sum, dim=-1, keepdim=True)
-        output: torch.Tensor = torch.cat([expected_x, expected_y], dim=-1)
+        output = torch.cat([expected_x, expected_y], dim=-1)
         return output.view(batch_size, channels, 2)  # BxNx2
 
 
@@ -84,8 +84,8 @@ class SpatialSoftArgmax2d(nn.Module):
 
 
 def spatial_soft_argmax2d(
-        input: torch.Tensor,
-        normalized_coordinates: Optional[bool] = True) -> torch.Tensor:
+        input,
+        normalized_coordinates = True) -> torch.Tensor:
     r"""Function that computes the Spatial Soft-Argmax 2D of a given heatmap.
 
     See :class:`torchgeometry.contrib.SpatialSoftArgmax2d` for details.

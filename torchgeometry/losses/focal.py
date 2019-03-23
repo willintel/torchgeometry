@@ -48,13 +48,13 @@ class FocalLoss(nn.Module):
         [1] https://arxiv.org/abs/1708.02002
     """
 
-    def __init__(self, alpha: float, gamma: Optional[float] = 2.0,
-                 reduction: Optional[str] = 'none') -> None:
+    def __init__(self, alpha, gamma = 2.0,
+                 reduction = 'none') -> None:
         super(FocalLoss, self).__init__()
-        self.alpha: float = alpha
-        self.gamma: Optional[float] = gamma
-        self.reduction: Optional[str] = reduction
-        self.eps: float = 1e-6
+        self.alpha = alpha
+        self.gamma = gamma
+        self.reduction = reduction
+        self.eps = 1e-6
 
     def forward(
             self,
@@ -106,9 +106,9 @@ class FocalLoss(nn.Module):
 def focal_loss(
         input: torch.Tensor,
         target: torch.Tensor,
-        alpha: float,
-        gamma: Optional[float] = 2.0,
-        reduction: Optional[str] = 'none') -> torch.Tensor:
+        alpha,
+        gamma = 2.0,
+        reduction = 'none') -> torch.Tensor:
     r"""Function that computes Focal loss.
 
     See :class:`~torchgeometry.losses.FocalLoss` for details.

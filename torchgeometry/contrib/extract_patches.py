@@ -74,28 +74,28 @@ class ExtractTensorPatches(nn.Module):
             stride: Optional[Union[int, Tuple[int, int]]] = 1,
             padding: Optional[Union[int, Tuple[int, int]]] = 0) -> None:
         super(ExtractTensorPatches, self).__init__()
-        self.window_size: Tuple[int, int] = _pair(window_size)
-        self.stride: Tuple[int, int] = _pair(stride)
-        self.padding: Tuple[int, int] = _pair(padding)
-        self.eps: float = 1e-6
+        self.window_size = _pair(window_size)
+        self.stride = _pair(stride)
+        self.padding = _pair(padding)
+        self.eps = 1e-6
 
         # create base kernel
-        self.kernel: torch.Tensor = self.create_kernel(self.window_size)
+        self.kernel = self.create_kernel(self.window_size)
 
     @staticmethod
     def create_kernel(
-            window_size: Tuple[int, int],
-            eps: float = 1e-6) -> torch.Tensor:
+            window_size,
+            eps = 1e-6) -> torch.Tensor:
         r"""Creates a binary kernel to extract the patches. If the window size
         is HxW will create a (H*W)xHxW kernel.
         """
-        window_range: int = window_size[0] * window_size[1]
-        kernel: torch.Tensor = torch.zeros(window_range, window_range) + eps
+        window_range = window_size[0] * window_size[1]
+        kernel = torch.zeros(window_range, window_range) + eps
         for i in range(window_range):
             kernel[i, i] += 1.0
         return kernel.view(window_range, 1, window_size[0], window_size[1])
 
-    def forward(self, input: torch.Tensor) -> torch.Tensor:
+    def forward(self, input) -> torch.Tensor:
         if not torch.is_tensor(input):
             raise TypeError("Input input type is not a torch.Tensor. Got {}"
                             .format(type(input)))
@@ -106,9 +106,9 @@ class ExtractTensorPatches(nn.Module):
         batch_size, channels, height, width = input.shape
 
         # run convolution 2d to extract patches
-        kernel: torch.Tensor = self.kernel.repeat(channels, 1, 1, 1)
+        kernel = self.kernel.repeat(channels, 1, 1, 1)
         kernel = kernel.to(input.device).to(input.dtype)
-        output_tmp: torch.Tensor = F.conv2d(
+        output_tmp = F.conv2d(
             input,
             kernel,
             stride=self.stride,
@@ -116,7 +116,7 @@ class ExtractTensorPatches(nn.Module):
             groups=channels)
 
         # reshape the output tensor
-        output: torch.Tensor = output_tmp.view(
+        output = output_tmp.view(
             batch_size, channels, self.window_size[0], self.window_size[1], -1)
         return output.permute(0, 4, 1, 2, 3)  # BxNxCxhxw
 
@@ -127,7 +127,7 @@ class ExtractTensorPatches(nn.Module):
 
 
 def extract_tensor_patches(
-        input: torch.Tensor,
+        input,
         window_size: Union[int, Tuple[int, int]],
         stride: Optional[Union[int, Tuple[int, int]]] = 1,
         padding: Optional[Union[int, Tuple[int, int]]] = 0) -> torch.Tensor:

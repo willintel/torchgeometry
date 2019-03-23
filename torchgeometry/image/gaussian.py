@@ -37,12 +37,12 @@ def get_gaussian_kernel(ksize: int, sigma: float) -> torch.Tensor:
     if not isinstance(ksize, int) or ksize % 2 == 0 or ksize <= 0:
         raise TypeError("ksize must be an odd positive integer. Got {}"
                         .format(ksize))
-    window_1d: torch.Tensor = gaussian(ksize, sigma)
+    window_1d = gaussian(ksize, sigma)
     return window_1d
 
 
-def get_gaussian_kernel2d(ksize: Tuple[int, int],
-                          sigma: Tuple[float, float]) -> torch.Tensor:
+def get_gaussian_kernel2d(ksize,
+                          sigma) -> torch.Tensor:
     r"""Function that returns Gaussian filter matrix coefficients.
 
     Args:
@@ -77,9 +77,9 @@ def get_gaussian_kernel2d(ksize: Tuple[int, int],
                         .format(sigma))
     ksize_x, ksize_y = ksize
     sigma_x, sigma_y = sigma
-    kernel_x: torch.Tensor = get_gaussian_kernel(ksize_x, sigma_x)
-    kernel_y: torch.Tensor = get_gaussian_kernel(ksize_y, sigma_y)
-    kernel_2d: torch.Tensor = torch.matmul(
+    kernel_x = get_gaussian_kernel(ksize_x, sigma_x)
+    kernel_y = get_gaussian_kernel(ksize_y, sigma_y)
+    kernel_2d = torch.matmul(
         kernel_x.unsqueeze(-1), kernel_y.unsqueeze(-1).t())
     return kernel_2d
 
@@ -108,28 +108,28 @@ class GaussianBlur(nn.Module):
         >>> output = gauss(input)  # 2x4x5x5
     """
 
-    def __init__(self, kernel_size: Tuple[int, int],
-                 sigma: Tuple[float, float]) -> None:
+    def __init__(self, kernel_size,
+                 sigma) -> None:
         super(GaussianBlur, self).__init__()
-        self.kernel_size: Tuple[int, int] = kernel_size
-        self.sigma: Tuple[float, float] = sigma
-        self._padding: Tuple[int, int] = self.compute_zero_padding(kernel_size)
-        self.kernel: torch.Tensor = self.create_gaussian_kernel(
+        self.kernel_size = kernel_size
+        self.sigma = sigma
+        self._padding = self.compute_zero_padding(kernel_size)
+        self.kernel = self.create_gaussian_kernel(
             kernel_size, sigma)
 
     @staticmethod
     def create_gaussian_kernel(kernel_size, sigma) -> torch.Tensor:
         """Returns a 2D Gaussian kernel array."""
-        kernel: torch.Tensor = get_gaussian_kernel2d(kernel_size, sigma)
+        kernel = get_gaussian_kernel2d(kernel_size, sigma)
         return kernel
 
     @staticmethod
-    def compute_zero_padding(kernel_size: Tuple[int, int]) -> Tuple[int, int]:
+    def compute_zero_padding(kernel_size) -> Tuple[int, int]:
         """Computes zero padding tuple."""
         computed = [(k - 1) // 2 for k in kernel_size]
         return computed[0], computed[1]
 
-    def forward(self, x: torch.Tensor):
+    def forward(self, x):
         if not torch.is_tensor(x):
             raise TypeError("Input x type is not a torch.Tensor. Got {}"
                             .format(type(x)))
@@ -138,8 +138,8 @@ class GaussianBlur(nn.Module):
                              .format(x.shape))
         # prepare kernel
         b, c, h, w = x.shape
-        tmp_kernel: torch.Tensor = self.kernel.to(x.device).to(x.dtype)
-        kernel: torch.Tensor = tmp_kernel.repeat(c, 1, 1, 1)
+        tmp_kernel = self.kernel.to(x.device).to(x.dtype)
+        kernel = tmp_kernel.repeat(c, 1, 1, 1)
 
         # convolve tensor with gaussian kernel
         return conv2d(x, kernel, padding=self._padding, stride=1, groups=c)
@@ -150,7 +150,7 @@ class GaussianBlur(nn.Module):
 ######################
 
 
-def gaussian_blur(src: torch.Tensor,
+def gaussian_blur(src,
                   kernel_size: Tuple[int,
                                      int],
                   sigma: Tuple[float,

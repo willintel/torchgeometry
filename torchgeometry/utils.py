@@ -15,8 +15,8 @@ __all__ = [
 
 
 def create_meshgrid(
-        height: int,
-        width: int,
+        height,
+        width,
         normalized_coordinates: Optional[bool] = True):
     """Generates a coordinate grid for an image.
 
@@ -36,8 +36,8 @@ def create_meshgrid(
         torch.Tensor: returns a grid tensor with shape :math:`(1, H, W, 2)`.
     """
     # generate coordinates
-    xs: Optional[torch.Tensor] = None
-    ys: Optional[torch.Tensor] = None
+    xs = None
+    ys = None
     if normalized_coordinates:
         xs = torch.linspace(-1, 1, width)
         ys = torch.linspace(-1, 1, height)
@@ -45,7 +45,7 @@ def create_meshgrid(
         xs = torch.linspace(0, width - 1, width)
         ys = torch.linspace(0, height - 1, height)
     # generate grid by stacking coordinates
-    base_grid: torch.Tensor = torch.stack(
+    base_grid = torch.stack(
         torch.meshgrid([xs, ys])).transpose(1, 2)  # 2xHxW
     return torch.unsqueeze(base_grid, dim=0).permute(0, 2, 3, 1)  # 1xHxWx2
 

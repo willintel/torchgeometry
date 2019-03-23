@@ -48,11 +48,11 @@ class TverskyLoss(nn.Module):
         [1]: https://arxiv.org/abs/1706.05721
     """
 
-    def __init__(self, alpha: float, beta: float) -> None:
+    def __init__(self, alpha, beta) -> None:
         super(TverskyLoss, self).__init__()
-        self.alpha: float = alpha
-        self.beta: float = beta
-        self.eps: float = 1e-6
+        self.alpha = alpha
+        self.beta = beta
+        self.eps = 1e-6
 
     def forward(
             self,
@@ -98,8 +98,8 @@ class TverskyLoss(nn.Module):
 def tversky_loss(
         input: torch.Tensor,
         target: torch.Tensor,
-        alpha: float,
-        beta: float) -> torch.Tensor:
+        alpha,
+        beta) -> torch.Tensor:
     r"""Function that computes Tversky loss.
 
     See :class:`~torchgeometry.losses.TverskyLoss` for details.

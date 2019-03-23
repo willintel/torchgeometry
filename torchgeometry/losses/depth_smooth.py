@@ -33,19 +33,19 @@ class InverseDepthSmoothnessLoss(nn.Module):
         super(InverseDepthSmoothnessLoss, self).__init__()
 
     @staticmethod
-    def gradient_x(img: torch.Tensor) -> torch.Tensor:
+    def gradient_x(img) -> torch.Tensor:
         assert len(img.shape) == 4, img.shape
         return img[:, :, :, :-1] - img[:, :, :, 1:]
 
     @staticmethod
-    def gradient_y(img: torch.Tensor) -> torch.Tensor:
+    def gradient_y(img) -> torch.Tensor:
         assert len(img.shape) == 4, img.shape
         return img[:, :, :-1, :] - img[:, :, 1:, :]
 
     def forward(
             self,
-            idepth: torch.Tensor,
-            image: torch.Tensor) -> torch.Tensor:
+            idepth,
+            image) -> torch.Tensor:
         if not torch.is_tensor(idepth):
             raise TypeError("Input idepth type is not a torch.Tensor. Got {}"
                             .format(type(idepth)))
@@ -70,20 +70,20 @@ class InverseDepthSmoothnessLoss(nn.Module):
                 "idepth and image must be in the same dtype. Got: {}" .format(
                     idepth.dtype, image.dtype))
         # compute the gradients
-        idepth_dx: torch.Tensor = self.gradient_x(idepth)
-        idepth_dy: torch.Tensor = self.gradient_y(idepth)
-        image_dx: torch.Tensor = self.gradient_x(image)
-        image_dy: torch.Tensor = self.gradient_y(image)
+        idepth_dx = self.gradient_x(idepth)
+        idepth_dy = self.gradient_y(idepth)
+        image_dx = self.gradient_x(image)
+        image_dy = self.gradient_y(image)
 
         # compute image weights
-        weights_x: torch.Tensor = torch.exp(
+        weights_x = torch.exp(
             -torch.mean(torch.abs(image_dx), dim=1, keepdim=True))
-        weights_y: torch.Tensor = torch.exp(
+        weights_y = torch.exp(
             -torch.mean(torch.abs(image_dy), dim=1, keepdim=True))
 
         # apply image weights to depth
-        smoothness_x: torch.Tensor = torch.abs(idepth_dx * weights_x)
-        smoothness_y: torch.Tensor = torch.abs(idepth_dy * weights_y)
+        smoothness_x = torch.abs(idepth_dx * weights_x)
+        smoothness_y = torch.abs(idepth_dy * weights_y)
         return torch.mean(smoothness_x) + torch.mean(smoothness_y)
 
 
@@ -93,8 +93,8 @@ class InverseDepthSmoothnessLoss(nn.Module):
 
 
 def inverse_depth_smoothness_loss(
-        idepth: torch.Tensor,
-        image: torch.Tensor) -> torch.Tensor:
+        idepth,
+        image) -> torch.Tensor:
     r"""Computes image-aware inverse depth smoothness loss.
 
     See :class:`~torchgeometry.losses.InvDepthSmoothnessLoss` for details.

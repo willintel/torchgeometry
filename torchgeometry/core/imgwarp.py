@@ -104,8 +104,8 @@ def warp_perspective(src, M, dsize, flags='bilinear', border_mode=None,
     return transform_warp_impl(src, M, (src.shape[-2:]), dsize)
 
 
-def warp_affine(src: torch.Tensor,
-                M: torch.Tensor,
+def warp_affine(src,
+                M,
                 dsize: Tuple[int,
                              int],
                 flags: Optional[str] = 'bilinear',
@@ -151,7 +151,7 @@ def warp_affine(src: torch.Tensor,
         raise ValueError("Input M must be a Bx2x3 tensor. Got {}"
                          .format(src.shape))
     # we generate a 3x3 transformation matrix from 2x3 affine
-    M_3x3: torch.Tensor = F.pad(M, (0, 0, 0, 1, 0, 0),
+    M_3x3 = F.pad(M, (0, 0, 0, 1, 0, 0),
                                 mode="constant", value=0)
     M_3x3[:, 2, 2] += 1.0
 
